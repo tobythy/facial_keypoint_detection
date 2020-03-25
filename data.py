@@ -8,7 +8,8 @@ from PIL import Image
 import itertools
 
 
-folder_list = ['I', 'II']
+# folder_list = ['I', 'II']
+folder_list = {'train':'./data/I/', 'test':'./data/II/'}
 train_boarder = 112
 
 
@@ -17,7 +18,7 @@ def channel_norm(img):
     mean = np.mean(img)
     std = np.std(img)
     pixels = (img - mean) / (std + 0.0000001)
-    return pixels
+    return pixels,mean,std
 
 
 def parse_line(line):
@@ -35,10 +36,12 @@ class Normalize(object):
     """
     def __call__(self, sample):
         image, landmarks = sample['image'], sample['landmarks']
-        image_resize = np.asarray(
-                            image.resize((train_boarder, train_boarder), Image.BILINEAR),
-                            dtype=np.float32)       # Image.ANTIALIAS)
-        image = channel_norm(image_resize)
+        # image_resize = np.asarray(
+        #                     image.resize((train_boarder, train_boarder), Image.BILINEAR),
+        #                     dtype=np.float32)       # Image.ANTIALIAS)
+        # image = channel_norm(image_resize)
+        image_resize = cv2.resize(image, (train_boarder, train_boarder))
+        image, mean, std = channel_norm(image_resize)
         return {'image': image,
                 'landmarks': landmarks
                 }
@@ -55,14 +58,18 @@ class ToTensor(object):
         # numpy image: H x W x C
         # torch image: C X H X W
         # image = image.transpose((2, 0, 1))
-        image = np.expand_dims(image, axis=0)
-        return {'image': torch.from_numpy(image),
+        # image = np.expand_dims(image, axis=0)
+        # return {'image': torch.from_numpy(image),
+        #         'landmarks': torch.from_numpy(landmarks)}
+
+        image = image.transpose((2, 0, 1))
+        return {'image': torch.from_numpy(image).unsqueeze(0),
                 'landmarks': torch.from_numpy(landmarks)}
 
 
 class FaceLandmarksDataset(Dataset):
     # Face Landmarks Dataset
-    def __init__(self, src_lines, transform=None):
+    def __init__(self, src_lines, phase, transform=None):
         '''
         :param src_lines: src_lines
         :param train: whether we are training or not
@@ -70,6 +77,7 @@ class FaceLandmarksDataset(Dataset):
         '''
         self.lines = src_lines
         self.transform = transform
+        self.phase = phase
 
     def __len__(self):
         return len(self.lines)
@@ -77,17 +85,23 @@ class FaceLandmarksDataset(Dataset):
     def __getitem__(self, idx):
         img_name, rect, landmarks = parse_line(self.lines[idx])
         # image
-        img = Image.open(img_name).convert('L')     
-        img_crop = img.crop(tuple(rect))            
+        # img = Image.open(img_name).convert('L')
+        # img_crop = img.crop(tuple(rect))
+        # landmarks = np.array(landmarks).astype(np.float32)
+        img = cv2.imread(folder_list[self.phase] + img_name)
+        img_crop = img[rect[1]:rect[3], rect[0]:rect[2], :]
         landmarks = np.array(landmarks).astype(np.float32)
-		
-		
-		# you should let your landmarks fit to the train_boarder(112)
-		# please complete your code under this blank
-		# your code:
-		
-		
-		
+
+        # you should let your landmarks fit to the train_boarder(112)
+        # please complete your code under this blank
+        # your code:
+        landmarks = landmarks.reshape(-1, 2)  # 转成x,y格式，便于后面操作
+        landmarks[:, 0] -= rect[0]  # 将x坐标与crop之后的image对齐
+        landmarks[:, 1] -= rect[1]  # 将y坐标与crop之后的image对齐
+        ori_h, ori_w, _ = img_crop.shape
+        landmarks[:, 0] *= 1.0 * train_boarder / ori_w  # 将x坐标缩放到resize之后的尺寸
+        landmarks[:, 1] *= 1.0 * train_boarder / ori_h  # 将y坐标缩放到resize之后的尺寸
+
 		
         sample = {'image': img_crop, 'landmarks': landmarks}
         sample = self.transform(sample)
@@ -95,7 +109,8 @@ class FaceLandmarksDataset(Dataset):
 
 
 def load_data(phase):
-    data_file = phase + '.txt'
+    # data_file = phase + '.txt'
+    data_file = folder_list[phase] + 'label.txt'
     with open(data_file) as f:
         lines = f.readlines()
     if phase == 'Train' or phase == 'train':
@@ -108,7 +123,7 @@ def load_data(phase):
             Normalize(),
             ToTensor()
         ])
-    data_set = FaceLandmarksDataset(lines, phase, transform=tsfm)
+    data_set = FaceLandmarksDataset(lines, phase, tsfm)
     return data_set
 
 
@@ -122,15 +137,15 @@ if __name__ == '__main__':
     train_set = load_data('train')
     for i in range(1, len(train_set)):
         sample = train_set[i]
-        img = sample['image']
+        img = sample['image'].squeeze(0).numpy().transpose((1,2,0))
         landmarks = sample['landmarks']
 		## 请画出人脸crop以及对应的landmarks
 		# please complete your code under this blank
-		
-		
-		
-		
-		
+        landmarks = landmarks.reshape(-1, 2)
+        for x, y in landmarks:
+            cv2.circle(img, (int(x), int(y)), 1, (0, 255, 0), -1)
+        cv2.imshow("face", img)
+
 
         key = cv2.waitKey()
         if key == 27:
