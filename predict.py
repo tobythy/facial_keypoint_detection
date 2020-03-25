@@ -10,7 +10,7 @@ import numpy as np
 import os
 import cv2
 
-from data import get_train_test_set
+from data_cv import get_train_test_set
 
 # 此部分代码针对stage 1中的predict。 是其配套参考代码
 # 对于stage3， 唯一的不同在于，需要接收除了pts以外，还有：label与分类loss。

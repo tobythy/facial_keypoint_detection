@@ -12,7 +12,7 @@ import numpy as np
 import os
 import cv2
 
-from data import get_train_test_set
+from data_cv import get_train_test_set
 from predict import predict
 
 torch.set_default_tensor_type(torch.FloatTensor)
