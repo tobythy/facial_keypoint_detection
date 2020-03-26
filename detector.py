@@ -48,6 +48,7 @@ class Net(nn.Module):
         self.preluip1 = nn.PReLU()
         self.preluip2 = nn.PReLU()
         self.ave_pool = nn.AvgPool2d(2, 2, ceil_mode=True)
+        nn.ReLU()
 
     def forward(self, x):
         # block 1

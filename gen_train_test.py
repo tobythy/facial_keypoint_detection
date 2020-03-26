@@ -51,12 +51,7 @@ def remove_invalid_image(lines, folder):
             images.append(line)
     return images
 
-# def load_metadata(folder_list, lable):
-#     tmp_lines = []
-#     for folder_name in folder_list:
-#         metadata_file = os.path.join(folder_name, lable)
-#         with open(metadata_file) as f:
-#             lines = f.readlines()
+
 
 def image_bgr_to_rgb(old_img):
     """
@@ -68,8 +63,10 @@ def image_bgr_to_rgb(old_img):
     return img_new
 
 
-if __name__ == '__main__':
-
+def expand_images_dict():
+    """
+    扩增所有图像
+    """
     expand_images = []
 
     for folder in FOLDER_LIST:
@@ -78,7 +75,7 @@ if __name__ == '__main__':
             lines = f.readlines()
             lines = remove_invalid_image(lines, folder)
             for line in lines:
-                info_list = line.replace("\n","").split(" ")
+                info_list = line.replace("\n", "").split(" ")
                 image_name = os.path.join(folder, info_list[0])
 
                 image = cv2.imread(image_name, 1)
@@ -92,14 +89,18 @@ if __name__ == '__main__':
                 y = list(map(float, info_list[6::2]))
                 image_landmarks = list(zip(x, y))
 
-                # image_landmarks = []
-                # for i in range(0, len(info_list) - 5, 2):
-                #     landmark = (float(info_list[i + 5]), float(info_list[i + 1 + 5]))
-                #     image_landmarks.append(landmark)
-
                 expand_images.append({"name": image_name,
                                       "rect": image_rect,
                                       "landmarks": image_landmarks})
+    return expand_images
+
+
+def data_to_str():
+    """
+    将图像数据转换为string
+    """
+
+    expand_images = expand_images_dict()
 
     train_test_info = []
 
@@ -117,16 +118,21 @@ if __name__ == '__main__':
         landmarks = info['landmarks']
         for i in range(0, len(landmarks)):
             center = landmarks[i]
-            center -= np.array([rect[0],rect[1]])
+            center -= np.array([rect[0], rect[1]])
             for center_coor in center:
                 train_test_str += " " + str(center_coor)
 
         train_test_info.append(train_test_str)
 
+    return train_test_info
 
-    # 验证正确性
-    idx = random.randint(0, len(train_test_info))
-    train_test_val = train_test_info[idx]
+
+def validation(images_info):
+    """
+    验证正确性
+    """
+    idx = random.randint(0, len(images_info))
+    train_test_val = images_info[idx]
     train_test = train_test_val.split(" ")
     image = cv2.imread(train_test[0], 1)
     print(train_test[0])
@@ -146,14 +152,26 @@ if __name__ == '__main__':
     plt.show()
 
 
-    # 生成训练、测试集， 8 ：2
+def generate_train_test(train_test_info, train_ratio = 0.8):
+    """
+    生成训练集和测试集，默认比例8：2
+    """
     shuffle(train_test_info)
-    split_idx = int(len(train_test_info) * 0.8)
-    with open("train.txt", "a+") as f:
+    split_idx = int(len(train_test_info) * train_ratio)
+    with open("train.txt", "w") as f:
         for i in range(split_idx):
             train_info = train_test_info[i]
             f.write(train_info + "\n")
-    with open("test.txt", "a+") as f:
+    with open("test.txt", "w") as f:
         for i in range(split_idx, len(train_test_info)):
             test_info = train_test_info[i]
             f.write(test_info + "\n")
+
+
+
+if __name__ == '__main__':
+
+    train_test_info = data_to_str()
+    validation(train_test_info)
+    generate_train_test(train_test_info)
+
