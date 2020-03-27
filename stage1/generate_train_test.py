@@ -6,8 +6,10 @@ import numpy as np
 import random
 from random import shuffle
 
-FOLDER_LIST = ['./data/I/', './data/II/']
-LABLE = 'label.txt'
+
+ROOT_DIR = '../data/'
+FOLDER_LIST = ['I', 'II']
+LABEL = 'label.txt'
 
 
 
@@ -67,19 +69,21 @@ def expand_images_dict():
     """
     扩增所有图像
     """
-    expand_images = []
+    image_infos = []
 
     for folder in FOLDER_LIST:
-        metadata_file = os.path.join(folder, LABLE)
-        with open(metadata_file) as f:
-            lines = f.readlines()
-            lines = remove_invalid_image(lines, folder)
-            for line in lines:
-                info_list = line.replace("\n", "").split(" ")
-                image_name = os.path.join(folder, info_list[0])
-
-                image = cv2.imread(image_name, 1)
-                h, w, channel = image.shape
+        DATA_DIR = ROOT_DIR + folder
+        # DATA_NAME = os.listdir(DATA_DIR)
+        # 整理包含的图片信息
+        with open(os.path.join(DATA_DIR, LABEL)) as f:
+            contents = f.readlines()
+            contents = remove_invalid_image(contents, DATA_DIR)
+            for content in contents:
+                info_list = content.replace("\n", "").split(" ")
+                image_name = info_list[0]
+                # 扩增矩形框
+                expend_img = cv2.imread(os.path.join(DATA_DIR, image_name), 1)
+                h, w, channel = expend_img.shape
 
                 roi_x1, roi_y1, roi_x2, roi_y2, new_w, new_h = expand_roi(
                     float(info_list[1]), float(info_list[2]), float(info_list[3]), float(info_list[4]), w, h
@@ -89,11 +93,10 @@ def expand_images_dict():
                 y = list(map(float, info_list[6::2]))
                 image_landmarks = list(zip(x, y))
 
-                expand_images.append({"name": image_name,
-                                      "rect": image_rect,
-                                      "landmarks": image_landmarks})
-    return expand_images
-
+                image_infos.append({"name": os.path.join(DATA_DIR, image_name),
+                                    "rect": image_rect,
+                                    "landmarks": image_landmarks})
+    return image_infos
 
 def data_to_str():
     """
