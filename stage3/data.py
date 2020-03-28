@@ -1,7 +1,3 @@
-# -*- coding:utf-8 -*-
-# Author: xzq
-# Date: 2019-12-25 15:46
-
 from torchvision import transforms
 import torch
 from torch.utils.data import Dataset

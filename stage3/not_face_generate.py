@@ -1,7 +1,3 @@
-# -*- coding:utf-8 -*-
-# Author: xzq
-# Date: 2019-12-24 19:03
-
 import os
 import cv2
 import numpy as np
