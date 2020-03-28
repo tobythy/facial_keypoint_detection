@@ -2,9 +2,9 @@
 ## Stage 1
 
 * `stage1\generate_train_test.py`: 扩增人脸，生成训练集和测试集
-* `stage1\data_pil.py`: PIL读取图片，灰度图
-* `stage1\data_cv2.py`: cv2读取数据，彩色图
-* `stage1\detector_t.py`: 网络搭建
+* `stage1\data.py`: PIL读取图片，灰度图
+* `stage1\detector.py`: 网络搭建
+* `stage1\detector_stage1.prototxt`: 网络文件，[绘制](https://ethereon.github.io/netscope/#/editor)
 
 ### 任务一: 生成 train/test.txt
 
@@ -82,3 +82,18 @@ flatten降维，把数据按照行优先的顺序排成一个一维的数据，�
 * 如果自己的层需要bp，如何实现？如何调用？<br>
 
 通过设置requires_grad参数，训练需要bp的层而冻结其他层。<br>
+
+
+## Stage 2
+
+* `stage2\data_augmentation.py`: 利用图片饱和度进行增广，增广图片于`data/stage2`
+* `stage2\generate_train_test.py`: 扩增人脸，生成训练集和测试集
+* `stage2\data.py`: 读取数据，去掉normalize
+* `stage2\detector.py`: 网络搭建，训练优化器换做Adam，Finetune用SGD
+
+## Stage 3
+
+* `stage3\not_face_generate.py`: 生成非人脸数据集，iou<0.3
+* `stage3\data.py`: 读取数据
+* `stage3\detector.py`: Resnet网络搭建
+* `stage3\detector.prototxt`: 网络文件

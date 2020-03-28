@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 import argparse
-from stage1.data_pil import get_train_test_set, channel_norm
+from stage1.data import get_train_test_set, channel_norm
 import os
 import matplotlib.pyplot as plt
 import numpy as np
@@ -239,7 +239,7 @@ def predict(img_name, model):
     :return:
     """
     img = cv2.imread(img_name, 1)
-    face_cascade = cv2.CascadeClassifier('./detector_architectures/haarcascade_frontalface_default.xml')
+    face_cascade = cv2.CascadeClassifier('../detector_architectures/haarcascade_frontalface_default.xml')
     faces = face_cascade.detectMultiScale(img, 1.2, 2)
     if len(faces) > 0:
         # 只截取一个人脸
@@ -325,7 +325,7 @@ def main_test():
     parser.add_argument('--save-directory', type=str, default='trained_models',
                         help='learnt models are saving here')
     # Train/train, Predict/predict, Finetune/finetune
-    parser.add_argument('--phase', type=str, default='Finetune',
+    parser.add_argument('--phase', type=str, default='Train',
                         help='training, predicting or finetuning')
     # 解析参数
     args = parser.parse_args()
@@ -372,7 +372,7 @@ def main_test():
     elif args.phase == 'Predict' or args.phase == 'predict':
         # predict
         model.load_state_dict(torch.load(
-            './trained_models/detector_epoch_99.pt'))
+            './trained_models/detector_epoch_99_MSELOSS_SGD_(batch_size=64)_(lr=0.00001)_finetune.pt'))
         predict("../data/Predict/predict.jpg", model)
 
 if __name__ == "__main__":

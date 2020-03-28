@@ -183,7 +183,7 @@ def predict(img_name, model):
     :return:
     """
     img = cv2.imread(img_name, 1)
-    face_cascade = cv2.CascadeClassifier('./detector_architectures/haarcascade_frontalface_default.xml')
+    face_cascade = cv2.CascadeClassifier('../detector_architectures/haarcascade_frontalface_default.xml')
     faces = face_cascade.detectMultiScale(img, 1.2, 2)
     model.eval()
     if len(faces) > 0:
@@ -318,7 +318,7 @@ def main_test():
     elif args.phase == 'Predict' or args.phase == 'predict':
         # predict
         model.load_state_dict(torch.load(
-            './trained_models/detector_MSELOSS_SGD_(batch_size=10)_(lr=0.0001)_stage2-2.pt'))
+            './trained_models/detector_MSELOSS_SGD_(batch_size=64)_(lr=0.001)_stage2.pt'))
         predict("../Data/Predict/predict.jpg", model)
 
 

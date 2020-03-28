@@ -6,7 +6,6 @@ from PIL import Image
 import cv2
 import random
 
-# 使用ResNet18时需要尺寸为32x32
 # train_boarder = 32
 train_boarder = 112
 
@@ -119,8 +118,7 @@ if __name__ == '__main__':
     # 为了保证输入输出一致，这里调用copy()方法获取连续的内存数据img_copy
     img_copy = img_test.copy()
     landmarks_test = sample_test['landmarks']
-    # 请画出人脸crop以及对应的landmarks
-    # please complete your code under this blank
+
     for i in range(0, len(landmarks_test), 2):
         # 由于关键点坐标是相对于人脸矩形框的，绘制时需要调整
         center = (int(landmarks_test[i]), int(landmarks_test[i + 1]))

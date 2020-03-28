@@ -8,7 +8,7 @@ from random import shuffle
 
 ROOT_DIR = '../data/'
 FOLDER_LIST = ['I', 'II']
-# FOLDER_LIST = ['I', 'II', 'stage2']
+FOLDER_LIST = ['I', 'II', 'stage2']
 LABEL = 'label.txt'
 
 images = []
@@ -21,10 +21,6 @@ def is_bigger_zero(a):
     :param a:
     :return:
     """
-    # if int(float(a)) < 0:
-    #     return 0
-    # else:
-    #     return round(float(a))
     if float(a) < 0:
         return 0
     else:
