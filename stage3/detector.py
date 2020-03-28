@@ -84,6 +84,8 @@ def show_train_and_val_loss(train_loss_result, val_loss_result, num_epoches):
     plt.legend()
     plt.title('train and val loss vs. epoches')
     plt.ylabel('loss')
+    plt.savefig("train and val loss vs epoches.jpg")
+    plt.close('all')
 
 
 def show_train_and_val_cls_loss(train_loss_result, val_loss_result, num_epoches):
@@ -96,6 +98,8 @@ def show_train_and_val_cls_loss(train_loss_result, val_loss_result, num_epoches)
     plt.legend()
     plt.title('train and val cls_loss vs. epoches')
     plt.ylabel('loss')
+    plt.savefig("train and val cls_loss vs epoches.jpg")
+    plt.close('all')
 
 
 def show_train_and_val_pts_loss(train_loss_result, val_loss_result, num_epoches):
@@ -108,6 +112,8 @@ def show_train_and_val_pts_loss(train_loss_result, val_loss_result, num_epoches)
     plt.legend()
     plt.title('train and val pts_loss vs. epoches')
     plt.ylabel('loss')
+    plt.savefig("train and val pts_loss vs epoches.jpg")
+    plt.close('all')
 
 
 def show_train_and_val_total_acc(train_acc_result, val_acc_result, num_epoches):
@@ -120,6 +126,8 @@ def show_train_and_val_total_acc(train_acc_result, val_acc_result, num_epoches):
     plt.legend()
     plt.title('train and val total_acc vs. epoches')
     plt.ylabel('loss')
+    plt.savefig("train and val total_acc vs epoches.jpg")
+    plt.close('all')
 
 
 def train(args, train_loader, valid_loader, model, criterion_is_face, criterion_face_pts, optimizer, device):
@@ -432,7 +440,7 @@ def main_test():
     parser.add_argument('--save-directory', type=str, default='trained_models',
                         help='learnt models are saving here')
     # Train/train, Predict/predict, Finetune/finetune
-    parser.add_argument('--phase', type=str, default='Predict',
+    parser.add_argument('--phase', type=str, default='Test',
                         help='training, predicting or finetuning')
     # 解析参数
     args = parser.parse_args()
@@ -475,7 +483,7 @@ def main_test():
         show_train_and_val_total_acc(train_total_correctes_result, valid_total_correctes_result, args.epochs)
     elif args.phase == 'Test' or args.phase == 'test':
         # test
-        model.load_state_dict(torch.load('./trained_models/detector_MSELOSS_SGD_(batch_size=10)_(lr=0.0001)_stage3.pt'))
+        model.load_state_dict(torch.load('./trained_models/detector_epoch_finetune_19.pt'))
         test(valid_loader, model, criterion_cls, criterion_pts)
     elif args.phase == 'Finetune' or args.phase == 'finetune':
         # finetune
